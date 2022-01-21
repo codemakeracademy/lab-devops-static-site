@@ -16,37 +16,37 @@ provider "aws" {
   region     = "us-west-2"
 }
 
-resource "aws_vpc" "daniil-vpc" {
+resource "aws_vpc" "vpc" {
   cidr_block           = "192.168.0.0/16"
   instance_tenancy     = "default"
   enable_dns_hostnames = true
 
   tags = {
-    Name = "daniil-vpc"
+    Name = "lab-vpc-daniil"
   }
 }
 
-resource "aws_subnet" "daniil-subnet" {
-  vpc_id                  = aws_vpc.daniil-vpc.id
+resource "aws_subnet" "subnet" {
+  vpc_id                  = aws_vpc.vpc.id
   cidr_block              = "192.168.0.0/24"
   availability_zone       = "us-west-2a"
   map_public_ip_on_launch = true
 
   tags = {
-    Name = "daniil-subnet"
+    Name = "lab-subnet-daniil"
   }
 }
 
 resource "aws_internet_gateway" "gateway" {
-  vpc_id = aws_vpc.daniil-vpc.id
+  vpc_id = aws_vpc.vpc.id
 
   tags = {
-    Name = "daniil-gateway"
+    Name = "lab-gateway-daniil"
   }
 }
 
 resource "aws_default_security_group" "default" {
-  vpc_id = aws_vpc.daniil-vpc.id
+  vpc_id = aws_vpc.vpc.id
 
   ingress = [
     {
@@ -82,7 +82,7 @@ resource "aws_default_security_group" "default" {
 }
 
 resource "aws_route_table" "route-table" {
-  vpc_id = aws_vpc.daniil-vpc.id
+  vpc_id = aws_vpc.vpc.id
 
   route {
     cidr_block = "0.0.0.0/0"
@@ -90,23 +90,23 @@ resource "aws_route_table" "route-table" {
   }
 
   tags = {
-    Name = "daniil-rtb"
+    Name = "lab-rtb-daniil"
   }
 }
 
 resource "aws_main_route_table_association" "main-rtb" {
-  vpc_id         = aws_vpc.daniil-vpc.id
+  vpc_id         = aws_vpc.vpc.id
   route_table_id = aws_route_table.route-table.id
 }
 
 resource "aws_instance" "app_server" {
   ami           = "ami-066333d9c572b0680"
   instance_type = "t2.micro"
-  subnet_id     = aws_subnet.daniil-subnet.id
+  subnet_id     = aws_subnet.subnet.id
 
   depends_on = [aws_internet_gateway.gateway]
 
   tags = {
-    Name = "daniil-instance"
+    Name = "lab-EC2_instance-daniil"
   }
 }
