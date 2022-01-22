@@ -100,8 +100,8 @@ resource "aws_main_route_table_association" "main-rtb" {
 }
 
 resource "aws_instance" "app_server" {
-  ami           = "ami-066333d9c572b0680"
-  instance_type = "t2.micro"
+  ami           = "ami-0ecf760d3d7e1fefa"
+  instance_type = "t3.medium"
   subnet_id     = aws_subnet.subnet.id
 
   depends_on = [aws_internet_gateway.gateway]
