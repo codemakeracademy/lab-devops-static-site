@@ -110,3 +110,19 @@ resource "aws_instance" "app_server" {
     Name = "lab-EC2_instance-daniil"
   }
 }
+
+resource "aws_cloudwatch_metric_alarm" "my_alarm" {
+    alarm_name          = "my_alarm"
+    comparison_operator = "LessThanOrEqualToThreshold"
+    evaluation_periods  = 12
+    metric_name         = "CPUUtilization"
+    namespace           = "AWS/EC2"
+    period              = 300
+    statistic           = "Average"
+    threshold           = 10
+    alarm_description = "Stop the EC2 instance when CPU utilization stays below 10% on average for 12 periods of 5 minutes, i.e. 1 hour"
+    alarm_actions     = ["arn:aws:automate:us-west-2:ec2:stop"]
+    dimensions = {
+        InstanceId = aws_instance.app_server.id
+    }
+}
