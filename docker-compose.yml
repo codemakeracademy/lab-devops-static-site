@@ -17,7 +17,8 @@ services:
       - socat
   socat:
     container_name: socat
-    image: socat-ca:latest
+#    image: socat-ca:latest
+    image: alpine/socat:latest
     command: tcp-listen:2375,fork,reuseaddr unix-connect:/var/run/docker.sock
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
