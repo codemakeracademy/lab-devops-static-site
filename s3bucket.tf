@@ -1,43 +1,38 @@
-resource "aws_s3_bucket" "b" {
-  bucket = "mybucket"
-  acl    = "private"
-
-  tags = {
-    Name = "My bucket"
+terraform {
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 3.0"
+      
+    }
   }
 }
-
-locals {
-  s3_origin_id = "myS3Origin"
+provider "aws" {
+  region = "us-west-2"
+}
+resource "aws_s3_bucket" "bucket" {
+  bucket = "mv-lab"
+  policy = file("policy.json")
+  acl = "public-read"
+    
+  website {
+      index_document = "index.html"
+      error_document = "/error/index.html"
+  }
 }
 
 resource "aws_cloudfront_distribution" "s3_distribution" {
   origin {
-    domain_name = aws_s3_bucket.b.bucket_regional_domain_name
-    origin_id   = local.s3_origin_id
-
-    s3_origin_config {
-      origin_access_identity = "origin-access-identity/cloudfront/ABCDEFG1234567"
-    }
+    domain_name = "mv-lab.s3.us-west-2.amazonaws.com"
+    origin_id   = "website"
   }
-
-  enabled             = true
-  is_ipv6_enabled     = true
-  comment             = "Some comment"
-  default_root_object = "index.html"
-
-  logging_config {
-    include_cookies = false
-    bucket          = "mylogs.s3.amazonaws.com"
-    prefix          = "myprefix"
+  viewer_certificate {
+    cloudfront_default_certificate = true
   }
-
-  aliases = ["mysite.example.com", "yoursite.example.com"]
-
   default_cache_behavior {
-    allowed_methods  = ["DELETE", "GET", "HEAD", "OPTIONS", "PATCH", "POST", "PUT"]
+    allowed_methods  = ["GET", "HEAD"]
     cached_methods   = ["GET", "HEAD"]
-    target_origin_id = local.s3_origin_id
+    target_origin_id = "website"
 
     forwarded_values {
       query_string = false
@@ -49,68 +44,17 @@ resource "aws_cloudfront_distribution" "s3_distribution" {
 
     viewer_protocol_policy = "allow-all"
     min_ttl                = 0
-    default_ttl            = 3600
-    max_ttl                = 86400
+    default_ttl            = 0
+    max_ttl                = 0
+    compress = true
+
   }
-
-  # Cache behavior with precedence 0
-  ordered_cache_behavior {
-    path_pattern     = "/content/immutable/*"
-    allowed_methods  = ["GET", "HEAD", "OPTIONS"]
-    cached_methods   = ["GET", "HEAD", "OPTIONS"]
-    target_origin_id = local.s3_origin_id
-
-    forwarded_values {
-      query_string = false
-      headers      = ["Origin"]
-
-      cookies {
-        forward = "none"
-      }
-    }
-
-    min_ttl                = 0
-    default_ttl            = 86400
-    max_ttl                = 31536000
-    compress               = true
-    viewer_protocol_policy = "redirect-to-https"
-  }
-
-  # Cache behavior with precedence 1
-  ordered_cache_behavior {
-    path_pattern     = "/content/*"
-    allowed_methods  = ["GET", "HEAD", "OPTIONS"]
-    cached_methods   = ["GET", "HEAD"]
-    target_origin_id = local.s3_origin_id
-
-    forwarded_values {
-      query_string = false
-
-      cookies {
-        forward = "none"
-      }
-    }
-
-    min_ttl                = 0
-    default_ttl            = 3600
-    max_ttl                = 86400
-    compress               = true
-    viewer_protocol_policy = "redirect-to-https"
-  }
-
-  price_class = "PriceClass_200"
-
-  restrictions {
+    enabled             = true
+    is_ipv6_enabled     = true
+    default_root_object = "index.html"
+    restrictions {
     geo_restriction {
-      restriction_type = "whitelist"
-      locations        = ["US", "CA", "GB", "DE"]
-    }
+      restriction_type = "none"
+      }
   }
-
-  tags = {
-    Environment = "production"
-  }
-
-  viewer_certificate {
-    cloudfront_default_certificate = true
-  }
+}
