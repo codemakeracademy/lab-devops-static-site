@@ -5,5 +5,6 @@ RUN apt-get install -y apt-utils
 RUN apt-get install -y uidmap
 RUN curl -sSL https://get.docker.com/ | sh
 RUN usermod -aG docker jenkins
+RUN chown -R 1000:1000 /opt/jenkins
 USER jenkins
 RUN dockerd-rootless-setuptool.sh install --skip-iptables
