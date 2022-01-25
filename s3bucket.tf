@@ -11,7 +11,7 @@ provider "aws" {
   region = "us-west-2"
 }
 resource "aws_s3_bucket" "bucket" {
-  bucket = "mv-lab"
+  bucket = "mv-lab123"
   policy = file("policy.json")
   acl = "public-read"
     
@@ -23,7 +23,7 @@ resource "aws_s3_bucket" "bucket" {
 
 resource "aws_cloudfront_distribution" "s3_distribution" {
   origin {
-    domain_name = "mv-lab.s3.us-west-2.amazonaws.com"
+    domain_name = "mv-lab123.s3.us-west-2.amazonaws.com"
     origin_id   = "website"
   }
   viewer_certificate {
