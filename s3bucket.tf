@@ -14,7 +14,10 @@ resource "aws_s3_bucket" "bucket" {
   bucket = "mv-lab123"
   policy = file("policy.json")
   acl = "public-read"
-    
+  
+  tags = {
+    Name = "mv-bucket"
+  
   website {
       index_document = "index.html"
       error_document = "/error/index.html"
