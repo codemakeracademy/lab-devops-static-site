@@ -1,23 +1,24 @@
 version: '3.8'
 services:
-#  jenkins:
-#    image: jenkins/jenkins:lts
-#    privileged: true
-#    user: root
-#    ports:
-#      - "8080:8080"
-#      - "50000:50000"
-#    container_name: jenkins
-#    volumes:
-#      - /home/${myname}/jenkins_compose/jenkins_configuration:/var/jenkins_home
-#      - /var/run/docker.sock:/var/run/docker.sock
-#    environment:
-#      - DOCKER_HOST=tcp://socat:2375
-#    depends_on:
-#      - socat
+  jenkins:
+    container_name: jenkins-docker
+    build:
+      context: ..
+      dockerfile: jenkins.Dockerfile
+    privileged: true
+    user: root
+    ports:
+      - "8080:8080"
+      - "50000:50000"
+    volumes:
+      - /home/${myname}/jenkins_compose/jenkins_configuration:/var/jenkins_home
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      - DOCKER_HOST=tcp://socat:2375
+    depends_on:
+      - socat
   socat:
     container_name: socat
-#    image: socat-ca:latest
     image: alpine/socat:latest
     command: tcp-listen:2375,fork,reuseaddr unix-connect:/var/run/docker.sock
     volumes:
@@ -26,7 +27,6 @@ services:
       - "2375"
   postgres:
     container_name: postgres
-#    image: postgres-ca:latest
     image: postgres:9.6
     environment:
       POSTGRES_USER: sonar
@@ -38,7 +38,6 @@ services:
         hard: 40000
   sonarqube:
     container_name: sonarqube
-#    image: sonarqube-ca:latest
     image: sonarqube:7.1
     ports:
       - "9000:9000"
