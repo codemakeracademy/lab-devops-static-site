@@ -8,7 +8,7 @@ terraform {
   }
 }
 provider "aws" {
-  profile = "mvoronkov"
+  profile = "PowerUserAccess-529396670287"
   region = "us-west-2"
 }
 resource "aws_s3_bucket" "bucket" {
