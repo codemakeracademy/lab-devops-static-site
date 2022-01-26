@@ -103,7 +103,7 @@ resource "aws_instance" "app_server" {
   ami           = "ami-0ecf760d3d7e1fefa"
   instance_type = "t3.medium"
   subnet_id     = aws_subnet.subnet.id
-
+  iam_instance_profile = "jenkins"
   depends_on = [aws_internet_gateway.gateway]
 
   tags = {
