@@ -17,7 +17,7 @@ resource "aws_s3_bucket" "bucket" {
   
   tags = {
     Name = "mv-bucket"
-  
+  }
   website {
       index_document = "index.html"
       error_document = "/error/index.html"
