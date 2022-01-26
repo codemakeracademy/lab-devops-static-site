@@ -14,12 +14,12 @@ provider "aws" {
   region = "us-west-2"
 }
 resource "aws_s3_bucket" "bucket" {
-  bucket = "mv-lab123"
+  bucket = "mv-lab12345s"
   policy = file("policy.json")
   acl = "public-read"
   
   tags = {
-    Name = "mv-bucket"
+    Name = "mv-bucket1234s"
   }
   website {
       index_document = "index.html"
