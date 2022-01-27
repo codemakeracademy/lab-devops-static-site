@@ -72,7 +72,7 @@ resource "aws_key_pair" "trogaev_key" {
 
 resource "aws_instance" "trogaev-jenkins-lab" {
   ami = "ami-066333d9c572b0680"
-  instance_type = "t3.medium"
+  instance_type = "t3.large"
   subnet_id = aws_subnet.trogaev-subnet.id
   vpc_security_group_ids = [aws_security_group.trogaev-sg.id] 
   key_name = aws_key_pair.trogaev_key.key_name
@@ -106,7 +106,7 @@ resource "aws_cloudwatch_metric_alarm" "my_alarm" {
     alarm_description = "Stop the EC2 instance when CPU utilization stays below 10% on average for 12 periods of 5 minutes, i.e. 1 hour"
     alarm_actions     = ["arn:aws:automate:us-west-2:ec2:stop"]
     dimensions = {
-        InstanceId = "i-0f0aff5a4e3d84205"
+        InstanceId = "i-0fbd165043e36ff4c"
     }
 }
 
@@ -124,4 +124,30 @@ resource "aws_cloudwatch_metric_alarm" "trogaev_alarm" {
     dimensions = {
         InstanceId = "${aws_instance.trogaev-jenkins-lab.id}"
     }
+}
+
+resource "aws_dynamodb_table" "dynamodb-terraform-state-trogaev" {
+  name = "terraform-state-lock-trogaev"
+  hash_key = "LockID"
+  read_capacity = 20
+  write_capacity = 20
+
+  attribute {
+    name = "LockID"
+    type = "S"
+  }
+}
+
+resource "aws_s3_bucket" "trogaev-bucket-remote-state" {
+  bucket = "trogaev-bucket-remote-state"
+  acl    = "public-read"
+
+  versioning {
+    enabled = true
+  }
+
+  tags = {
+    Name        = "trogaev-bucket-remote-state"
+  }
+
 }
