@@ -1,0 +1,118 @@
+terraform {
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 3.27"
+    }
+  }
+
+  required_version = ">= 0.14.9"
+}
+
+provider "aws" {
+ # access_key = var.access_key
+ # secret_key = var.secret_key
+ # token      = var.token
+  region     = "us-west-2"
+}
+
+resource "aws_vpc" "vpc" {
+  cidr_block           = "192.168.0.0/16"
+  instance_tenancy     = "default"
+  enable_dns_hostnames = true
+
+  tags = {
+  Name = "vpc_mike"
+  }
+}
+
+resource "aws_subnet" "subnet" {
+  vpc_id                  = aws_vpc.vpc.id
+  cidr_block              = "192.168.0.0/24"
+  availability_zone       = "us-west-2a"
+  map_public_ip_on_launch = true
+
+  tags = {
+    Name = "sub_mike"
+  }
+}
+
+resource "aws_internet_gateway" "gateway" {
+  vpc_id = aws_vpc.vpc.id
+
+  tags = {
+    Name = "gw_mike"
+  }
+}
+
+resource "aws_default_security_group" "default" {
+  vpc_id = aws_vpc.vpc.id
+
+  ingress = [
+    {
+      cidr_blocks      = ["0.0.0.0/0"]
+      description      = ""
+      from_port        = 0
+      ipv6_cidr_blocks = ["::/0"]
+      prefix_list_ids  = []
+      protocol         = "-1"
+      security_groups  = []
+      self             = false
+      to_port          = 0
+    },
+    {
+      cidr_blocks      = []
+      description      = ""
+      from_port        = 0
+      ipv6_cidr_blocks = []
+      prefix_list_ids  = []
+      protocol         = "-1"
+      security_groups  = []
+      self             = true
+      to_port          = 0
+    },
+  ]
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
+
+resource "aws_route_table" "route-table" {
+  vpc_id = aws_vpc.vpc.id
+
+  route {
+    cidr_block = "0.0.0.0/0"
+    gateway_id = aws_internet_gateway.gateway.id
+  }
+
+  tags = {
+    Name = "rt_mike"
+  }
+}
+
+resource "aws_main_route_table_association" "main-rtb" {
+  vpc_id         = aws_vpc.vpc.id
+  route_table_id = aws_route_table.route-table.id
+}
+
+resource "aws_instance" "app_server" {
+  ami           = "ami-066333d9c572b0680"
+  instance_type = "t3.large"
+  key_name = "mike_key"
+  subnet_id     = aws_subnet.subnet.id
+
+
+  depends_on = [aws_internet_gateway.gateway]
+
+  tags = {
+    Name = "Lab_terra_voronkov1"
+  }
+}
+#resource "aws_key_pair" "EC2" {
+#  key_name   = "EC2"
+#  public_key = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQCY/Reib1iP4I2ZUh7pYbeYiNF/mWuMJy0crs4fVcgLVcR0Fsh6Dbe1laN3gZCtSe9moBx7Y2J+KUolQclNhuRzsNnIDpw+PFd4ui0+EVI7eBswae+7/gMYpxntGmjPqKJ8oZGAzCTzxc3g0agnTOmMP1L4EG6PkVA8EYKUKsAaNTkhsYxebeKsfyLEhx/Flint7WEnyZpbkjaJx1aiURyhCUVAfcY23pE1C6OudGMtVVlPTSlodKkWaAfQXyCmHKZBUXnVNLvcBYllo5k8SXFa02g/37CuOR3k4eLjpLuOawP/Y325fA+97DCccy9ffKqTGkob1cYGtXRhdRsbw7H//7dEk4D4CyQkyCVX38myrb8pk59J4ZEWKIe7kxJzP4cvXx4ewNInqXhADqP8DmH6oUmYngapmD/giCqijgiJ3toUbiYzxtahYo88KBJCYVsbfXCV+covsaOhbizfiEKXsha63W0e02xgdQGgWcQJ4r38sqooz27pjSF33T9onpM= root@debian"
+#}
