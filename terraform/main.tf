@@ -81,12 +81,27 @@ resource "aws_instance" "trogaev-jenkins-lab" {
   subnet_id = aws_subnet.trogaev-subnet.id
   vpc_security_group_ids = [aws_security_group.trogaev-sg.id] 
   key_name = aws_key_pair.trogaev_key.key_name
-  #iam_instance_profile = "jenkins"
+  iam_instance_profile = "jenkins"
   root_block_device {
     volume_size = "20"
   }
   tags = {
     Name = "trogaev-jenkins-lab"
+  }
+}
+
+resource "aws_instance" "trogaev-jenkins-k8s" {
+  ami = "ami-0892d3c7ee96c0bf7"
+  instance_type = "t3.large"
+  subnet_id = aws_subnet.trogaev-subnet.id
+  vpc_security_group_ids = [aws_security_group.trogaev-sg.id] 
+  key_name = aws_key_pair.trogaev_key.key_name
+  iam_instance_profile = "jenkins"
+  root_block_device {
+    volume_size = "20"
+  }
+  tags = {
+    Name = "trogaev-jenkins-k8s"
   }
 }
 
@@ -103,6 +118,22 @@ resource "aws_cloudwatch_metric_alarm" "trogaev_alarm" {
     alarm_actions     = ["arn:aws:automate:us-west-2:ec2:stop"]
     dimensions = {
         InstanceId = "${aws_instance.trogaev-jenkins-lab.id}"
+    }
+}
+
+resource "aws_cloudwatch_metric_alarm" "trogaev2_alarm" {
+    alarm_name          = "trogaev2_alarm"
+    comparison_operator = "LessThanOrEqualToThreshold"
+    evaluation_periods  = 12
+    metric_name         = "CPUUtilization"
+    namespace           = "AWS/EC2"
+    period              = 300
+    statistic           = "Average"
+    threshold           = 10
+    alarm_description = "Stop the EC2 instance when CPU utilization stays below 10% on average for 12 periods of 5 minutes, i.e. 1 hour"
+    alarm_actions     = ["arn:aws:automate:us-west-2:ec2:stop"]
+    dimensions = {
+        InstanceId = "${aws_instance.trogaev-jenkins-k8s.id}"
     }
 }
 
