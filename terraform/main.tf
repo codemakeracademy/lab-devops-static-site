@@ -70,6 +70,11 @@ resource "aws_eip" "trogaev-eip" {
   vpc      = true
 }
 
+resource "aws_eip" "trogaev-eip-k8s" {
+  instance = aws_instance.trogaev-jenkins-k8s.id
+  vpc      = true
+}
+
 resource "aws_key_pair" "trogaev_key" {
   key_name = "rp"
   public_key = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC7E0QKlKmk97ZeNjl8pC0g898h7MqF8ci/YbamrYSkgAemVc5drIafHHvzi+njpjHUiOH7pPP/nS8l7bZSGPdQW+mYYcmMjm0AlqFdp84GTuSz15CQJmWyx03eLnWXfe4cKx6mdc3BqMQduF/E7/SeO3ZGOatzY766FOo97KSbPqc8mtb9HR2JhPwugCiEqYWB6o+sl3+9/1V7gc8PzHnJKJkd9nvvYSZ3bQuC2S715WQvRuxYs1SqBfBn5tknYPYcs8nvP+fUXj/5yiYsNNw1CrMlgRF9oD9EI/w9jgrxsxuleCEzcfmo8GX3iK+Bg4aqaIC2k+ImZ8gnROtiiEJL pi@raspberrypi"
@@ -161,4 +166,41 @@ resource "aws_s3_bucket" "trogaev-bucket-remote-state" {
     Name        = "trogaev-bucket-remote-state"
   }
 
+}
+
+
+resource "aws_ecr_repository" "trogaev-ecr" {
+  name                 = "trogaev-ecr"
+  image_tag_mutability = "MUTABLE"
+
+  image_scanning_configuration {
+    scan_on_push = true
+  }
+  tags = {
+    Name = "trogaev-ecr"
+  }
+}
+
+resource "aws_ecr_repository" "trogaev-ecr-backend" {
+  name                 = "trogaev-ecr-backend"
+  image_tag_mutability = "MUTABLE"
+
+  image_scanning_configuration {
+    scan_on_push = true
+  }
+  tags = {
+    Name = "trogaev-ecr-backend"
+  }
+}
+
+resource "aws_ecr_repository" "trogaev-ecr-backend-dacpack" {
+  name                 = "trogaev-ecr-backend-dacpack"
+  image_tag_mutability = "MUTABLE"
+
+  image_scanning_configuration {
+    scan_on_push = true
+  }
+  tags = {
+    Name = "trogaev-ecr-backend-dacpack"
+  }
 }

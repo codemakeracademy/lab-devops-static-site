@@ -1,0 +1,34 @@
+---
+- hosts: webservers
+  user: ubuntu
+  become: yes
+
+  tasks:
+
+  - name: enable ingress
+    command: microk8s enable ingress
+
+  - name: chown
+    command: chown -f -R ubuntu ~/.kube
+    
+  - name: create app dir
+    file:
+      path: /home/ubuntu/weekly-team-report-helm-devops
+      state: directory
+
+  - name: Example clone of a single branch
+    ansible.builtin.git:
+      repo: https://github.com/Maxim1802/weekly-team-report-helm-devops.git
+      dest: /home/ubuntu/weekly-team-report-helm-devops
+      version: develop
+
+  - name: K8s helm
+    kubernetes.core.helm:
+      name: myapp-backend
+      chart_ref: /home/ubuntu/weekly-team-report-helm-devops/myapp-backend/helm
+      release_namespace: deploy-backend
+      create_namespace: true
+      wait: true
+      replace: true
+      kubeconfig: /home/ubuntu/.kube/config
+
